@@ -25,7 +25,7 @@ export default function Footer() {
               SUKO HARIADI<span className="text-emerald-500">.</span>
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Full Stack Web Developer & RPL Student
+              Full Stack Web Developer & RPL 
             </p>
           </div>
 
