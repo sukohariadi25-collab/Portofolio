@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Suko Hariadi — Full Stack Developer Portfolio</title>
+    <meta name="description" content="Portofolio Rekayasa Perangkat Lunak Dymas Alfin." />
+    
+    <!-- Favicon Kustom -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%230f172a'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='38' font-family='sans-serif' font-weight='bold'>DA</text></svg>" />
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+      }
+    </script>
+    <style>
+      html { scroll-behavior: smooth; }
+    </style>
+  </head>
+  <body class="bg-[#EBECEE] dark:bg-[#0B0F17] transition-colors duration-300">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
