@@ -56,34 +56,6 @@ export default function Footer() {
           
           <p>© {currentYear} Suko Hariadi. All rights reserved.</p>
 
-          {/* Social Links */}
-          <div className="flex items-center gap-5 font-medium">
-            <a
-              href="https://github.com/sukohariadi25-collab"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-slate-900 dark:hover:text-white transition-colors"
-            >
-              GitHub
-            </a>
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-slate-900 dark:hover:text-white transition-colors"
-            >
-              LinkedIn
-            </a>
-            <a
-              href="https://www.instagram.com/its.shuu31?stkn=eHVnOWRqYWVnb2tz"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-slate-900 dark:hover:text-white transition-colors"
-            >
-              Instagram
-            </a>
-          </div>
-
         </div>
 
       </div>

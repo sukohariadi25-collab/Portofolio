@@ -1,291 +1,290 @@
-import { Github, Linkedin, Instagram } from './Icons';
-import { ArrowUpRight } from 'lucide-react';
-import { useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 
-type BrushPoint = {
-  x: number;
-  y: number;
-  size: number;
-  rotation: number;
-  createdAt: number;
-};
+// Komponen Ikon Panah Ke Atas Kanan
+const ArrowIcon: React.FC<{ className?: string }> = ({ className = "w-3.5 h-3.5" }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2.5" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="M7 17L17 7" />
+    <path d="M7 7h10v10" />
+  </svg>
+);
 
-export default function Hero() {
+export const Hero: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const pointsRef = useRef<BrushPoint[]>([]);
-  const imageRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
     const img = new Image();
     img.src = '/profile.png';
+    img.crossOrigin = 'anonymous';
+
+    // Fungsi untuk me-draw/reset layer Hitam-Putih ke Canvas
+    const initGrayscaleCanvas = () => {
+      if (!canvas || !ctx) return;
+      canvas.width = img.width;
+      canvas.height = img.height;
+
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.drawImage(img, 0, 0);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+
+      for (let i = 0; i < data.length; i += 4) {
+        const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+        data[i] = avg;     // Red
+        data[i + 1] = avg; // Green
+        data[i + 2] = avg; // Blue
+      }
+      ctx.putImageData(imageData, 0, 0);
+    };
+
     img.onload = () => {
-      imageRef.current = img;
+      initGrayscaleCanvas();
     };
-  }, []);
 
-  useEffect(() => {
-    const updateCanvasSize = () => {
-      const canvas = canvasRef.current;
-      const container = containerRef.current;
-      if (canvas && container) {
-        canvas.width = container.clientWidth;
-        canvas.height = container.clientHeight;
+    // Fungsi untuk mengusap (scratch/reveal)
+    const handleScratch = (e: MouseEvent | TouchEvent) => {
+      if (!canvas || !ctx) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+
+      const x = (clientX - rect.left) * scaleX;
+      const y = (clientY - rect.top) * scaleY;
+
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(x, y, 45, 0, Math.PI * 2);
+      ctx.fill();
+    };
+
+    const handleScroll = () => {
+      if (window.scrollY > 150) {
+        initGrayscaleCanvas();
       }
     };
 
-    updateCanvasSize();
-    window.addEventListener('resize', updateCanvasSize);
-    return () => window.removeEventListener('resize', updateCanvasSize);
-  }, []);
-
-  useEffect(() => {
-    let animationFrameId: number;
-    const DURATION = 3500;
-
-    const render = () => {
-      const canvas = canvasRef.current;
-      const img = imageRef.current;
-
-      if (canvas && img) {
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          const now = Date.now();
-
-          pointsRef.current = pointsRef.current.filter(
-            (p) => now - p.createdAt < DURATION
-          );
-
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-          if (pointsRef.current.length > 0) {
-            ctx.save();
-            ctx.globalCompositeOperation = 'source-over';
-
-            pointsRef.current.forEach((p) => {
-              const age = now - p.createdAt;
-              const opacity = Math.max(0, 1 - age / DURATION);
-
-              ctx.save();
-              ctx.translate(p.x, p.y);
-              ctx.rotate(p.rotation);
-              ctx.globalAlpha = opacity;
-
-              drawBrush(ctx, p.size);
-
-              ctx.restore();
-            });
-
-            ctx.globalCompositeOperation = 'source-in';
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-            ctx.restore();
-          }
-        }
-      }
-
-      animationFrameId = requestAnimationFrame(render);
-    };
-
-    render();
+    canvas.addEventListener('mousemove', handleScratch);
+    canvas.addEventListener('mouseenter', handleScratch);
+    canvas.addEventListener('touchmove', handleScratch);
+    canvas.addEventListener('touchstart', handleScratch);
+    window.addEventListener('scroll', handleScroll);
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      canvas.removeEventListener('mousemove', handleScratch);
+      canvas.removeEventListener('mouseenter', handleScratch);
+      canvas.removeEventListener('touchmove', handleScratch);
+      canvas.removeEventListener('touchstart', handleScratch);
+      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    addPoint(x, y);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const touch = e.touches[0];
-    if (!touch) return;
-
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-
-    addPoint(x, y);
-  };
-
-  const addPoint = (x: number, y: number) => {
-    pointsRef.current.push({
-      x,
-      y,
-      size: Math.random() * 20 + 60,
-      rotation: (Math.random() - 0.5) * 1.5,
-      createdAt: Date.now(),
-    });
-  };
-
-  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const target = e.currentTarget;
-    if (canvasRef.current) {
-      canvasRef.current.width = target.clientWidth;
-      canvasRef.current.height = target.clientHeight;
-    }
-  };
-
   return (
-    <section className="bg-[#EAEBED] dark:bg-[#0B0F17] px-2 sm:px-6 pt-16 pb-3 sm:py-12 h-auto sm:min-h-screen flex items-center justify-center transition-colors duration-300">
+    <section className="px-2 sm:px-4 py-4 md:px-8 max-w-7xl mx-auto">
+      {/* 0. CSS Injected (Font Arial & Dynamic Stroke) */}
       <style>{`
-        @keyframes marquee {
-          0% { transform: translateX(0%); }
-          100% { transform: translateX(-50%); }
+        .font-arial {
+          font-family: Arial, Helvetica, sans-serif;
         }
-        .animate-marquee {
+
+        /* Stroke Style Light & Dark */
+        .text-stroke {
+          -webkit-text-stroke: 1.5px #1e293b;
+          color: transparent;
+        }
+        .dark .text-stroke {
+          -webkit-text-stroke: 1.5px #f8fafc;
+          color: transparent;
+        }
+
+        @media (min-width: 768px) {
+          .text-stroke {
+            -webkit-text-stroke: 2px #1e293b;
+          }
+          .dark .text-stroke {
+            -webkit-text-stroke: 2px #f8fafc;
+          }
+        }
+
+        /* Shadow Effect pada Teks Background */
+        .text-shadow-hero {
+          text-shadow: 
+            0 10px 20px rgba(0, 0, 0, 0.08),
+            0 2px 4px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Texture Noise/Grain Overlay */
+        .grain-bg {
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+
+        /* Animasi Marquee Running */
+        @keyframes marquee-left {
+          0% {
+            transform: translateX(0%);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+
+        .animate-marquee-left {
           display: flex;
-          width: max-content;
-          animation: marquee 22s linear infinite;
+          white-space: nowrap;
+          animation: marquee-left 25s linear infinite;
         }
-        @keyframes float-slow {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-5px) rotate(2deg); }
+
+        /* Animasi Floating Badges */
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-6px);
+          }
         }
-        @keyframes float-delayed {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(5px) rotate(-2deg); }
+
+        .animate-float-slow {
+          animation: float 4s ease-in-out infinite;
         }
-        .animate-float {
-          animation: float-slow 4s ease-in-out infinite;
-        }
+
         .animate-float-delayed {
-          animation: float-delayed 5s ease-in-out infinite;
+          animation: float 4.5s ease-in-out 1.5s infinite;
         }
       `}</style>
-      
-      {/* Container Card Utama - Proporsional Persegi Panjang di Mobile & Desktop */}
-      <div className="bg-[#F8F9FA] dark:bg-slate-900/90 rounded-[20px] sm:rounded-[32px] w-full max-w-7xl p-3 sm:p-8 md:p-10 shadow-sm border border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between h-[300px] xs:h-[360px] sm:h-[500px] md:h-[600px] relative overflow-hidden transition-colors duration-300">
+
+      {/* Outer Card (Light / Dark Mode Support) */}
+      <div className="relative bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-4 sm:p-6 md:p-8 min-h-[380px] xs:min-h-[420px] sm:min-h-[500px] md:min-h-[580px] flex flex-col justify-between overflow-hidden shadow-sm select-none transition-colors duration-300">
         
-        {/* Background Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[120px] sm:w-[600px] sm:h-[300px] bg-gradient-to-tr from-slate-200/50 via-indigo-50/30 to-transparent dark:from-slate-800/40 dark:via-indigo-950/30 rounded-full blur-2xl sm:blur-3xl pointer-events-none z-0" />
-        
-        {/* TECH BADGES MELAYANG - Tampil Presisi di Mobile & Desktop */}
-        <div className="absolute top-[40%] left-[8%] xs:left-[14%] sm:left-[28%] md:left-[32%] z-30 flex items-center gap-1 sm:gap-2 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-slate-200/60 dark:border-slate-700/50 text-[9px] xs:text-[10px] sm:text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm animate-float pointer-events-none whitespace-nowrap">
-          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-400" /> React & Next.js
-        </div>
+        {/* Grain Noise Overlay Layer */}
+        <div className="absolute inset-0 pointer-events-none z-0 grain-bg opacity-70 dark:opacity-30"></div>
 
-        <div className="absolute top-[40%] right-[8%] xs:right-[14%] sm:right-[28%] md:right-[32%] z-30 flex items-center gap-1 sm:gap-2 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-slate-200/60 dark:border-slate-700/50 text-[9px] xs:text-[10px] sm:text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm animate-float-delayed pointer-events-none whitespace-nowrap">
-          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-blue-500" /> TypeScript
-        </div>
-
-        <div className="absolute top-[58%] left-[8%] xs:left-[14%] sm:left-[28%] md:left-[32%] z-30 flex items-center gap-1 sm:gap-2 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-slate-200/60 dark:border-slate-700/50 text-[9px] xs:text-[10px] sm:text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm animate-float-delayed pointer-events-none whitespace-nowrap">
-          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-cyan-400" /> Laravel
-        </div>
-
-        <div className="absolute top-[58%] right-[8%] xs:right-[14%] sm:right-[28%] md:right-[32%] z-30 flex items-center gap-1 sm:gap-2 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-slate-200/60 dark:border-slate-700/50 text-[9px] xs:text-[10px] sm:text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm animate-float pointer-events-none whitespace-nowrap">
-          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-blue-500" /> Mysql
-        </div>
-
-        {/* 1. HEADER / STATUS */}
-        <header className="flex justify-between items-center z-30 w-full">
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200/80 dark:border-slate-700/60 text-[10px] sm:text-xs font-medium text-slate-700 dark:text-slate-200 shadow-sm">
-            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse" />
+        {/* 1. Status Badge (Atas Kiri) */}
+        <div className="z-30 flex justify-between items-start">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full border border-slate-200/80 dark:border-slate-700 text-[10px] sm:text-xs md:text-sm font-medium text-slate-700 dark:text-slate-200 shadow-sm transition-colors">
+            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             Available for New Project
           </div>
-        </header>
+        </div>
 
-        {/* 2. TEKS BERJALAN (MARQUEE) */}
-        <div className="w-full overflow-hidden select-none z-0 absolute top-8 xs:top-10 sm:top-20 left-0 pointer-events-none opacity-90">
-          <div className="animate-marquee flex items-center whitespace-nowrap">
-            {[...Array(4)].map((_, index) => (
-              <div key={index} className="flex items-center gap-3 sm:gap-8 mr-3 sm:mr-8">
-                <h1 className="text-[15vw] xs:text-[18vw] sm:text-[130px] lg:text-[150px] font-black uppercase tracking-tight flex items-center gap-2 sm:gap-4">
-                  <span 
-                    className="text-slate-900 dark:text-white"
-                    style={{ 
-                      WebkitTextFillColor: 'transparent', 
-                      WebkitTextStroke: '1.5px currentColor',
-                    }}
-                  >
-                    SUKO
-                  </span>
-                  <span className="text-slate-900 dark:text-white">
-                    HARIADI
-                  </span>
-                </h1>
-                <span className="text-slate-300 dark:text-slate-700 text-2xl sm:text-6xl font-light">•</span>
-              </div>
-            ))}
+        {/* 2. Text Background Raksasa */}
+        <div className="absolute inset-0 flex items-center pointer-events-none z-0 overflow-hidden -translate-y-8 xs:-translate-y-10 sm:-translate-y-12 md:-translate-y-16">
+          <div className="animate-marquee-left flex gap-6 sm:gap-12 items-center">
+            <h1 className="font-arial text-[13vw] sm:text-[11vw] md:text-[9.5vw] font-black tracking-wider text-slate-800 dark:text-slate-100 uppercase leading-none whitespace-nowrap text-shadow-hero transition-colors">
+              SUKO<span className="text-stroke">HARIADI</span>
+            </h1>
+            <h1 className="font-arial text-[13vw] sm:text-[11vw] md:text-[9.5vw] font-black tracking-wider text-slate-800 dark:text-slate-100 uppercase leading-none whitespace-nowrap text-shadow-hero transition-colors">
+              SUKO<span className="text-stroke">HARIADI</span>
+            </h1>
           </div>
         </div>
 
-        {/* 3. FOTO PORTRAIT */}
+        {/* 3. Center Area: Foto Color + Canvas Brush Masking & Badges */}
         <div 
-          ref={containerRef}
-          className="absolute bottom-0 left-1/2 -translate-x-[23%] z-20 w-[140px] xs:w-[180px] sm:w-[400px] md:w-[400px] lg:w-[450px] select-none touch-none pointer-events-auto"
-          onMouseMove={handleMouseMove}
-          onTouchMove={handleTouchMove}
+          style={{ left: '50%', transform: 'translateX(-50%)' }}
+          className="absolute bottom-0 z-10 w-full max-w-[280px] xs:max-w-[320px] sm:max-w-[420px] md:max-w-[500px] pointer-events-none"
         >
-          <div className="relative w-full h-auto">
+          <div className="relative w-full">
+            
+            {/* Layer Bawah: Gambar Asli Berwarna */}
             <img
               src="/profile.png"
-              alt="Suko Hariadi"
-              onLoad={handleImageLoad}
-              className="w-full h-auto object-contain grayscale contrast-110 block pointer-events-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.15)] sm:drop-shadow-[0_20px_30px_rgba(0,0,0,0.2)]scale-115 sm:scale-100"
+              alt="Profile Color"
+              className="w-full h-auto object-cover object-bottom drop-shadow-2xl mx-auto block pointer-events-none"
             />
+
+            {/* Layer Atas: Canvas Grayscale interaktif */}
             <canvas
               ref={canvasRef}
-              className="absolute inset-0 w-full h-full pointer-events-none"
+              className="absolute inset-0 w-full h-full object-cover object-bottom cursor-pointer pointer-events-auto"
             />
+
+            {/* Tech Badges */}
+            <div className="flex absolute top-[40%] -left-3 sm:-left-6 md:-left-12 z-20 items-center gap-1.5 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm px-2 py-0.5 sm:px-3.5 sm:py-1.5 rounded-full shadow-md border border-slate-100 dark:border-slate-700 text-[9px] sm:text-xs font-semibold text-slate-800 dark:text-slate-100 pointer-events-auto animate-float-slow whitespace-nowrap transition-colors">
+              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-sky-500"></span>
+              React & Next.js
+            </div>
+
+            <div className="flex absolute top-[41%] -right-3 sm:-right-6 md:-right-12 z-20 items-center gap-1.5 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm px-2 py-0.5 sm:px-3.5 sm:py-1.5 rounded-full shadow-md border border-slate-100 dark:border-slate-700 text-[9px] sm:text-xs font-semibold text-slate-800 dark:text-slate-100 pointer-events-auto animate-float-delayed whitespace-nowrap transition-colors">
+              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-blue-600"></span>
+              TypeScript
+            </div>
+
+            <div className="flex absolute top-[60%] -left-1 sm:-left-2 md:-left-6 z-20 items-center gap-1.5 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm px-2 py-0.5 sm:px-3.5 sm:py-1.5 rounded-full shadow-md border border-slate-100 dark:border-slate-700 text-[9px] sm:text-xs font-semibold text-slate-800 dark:text-slate-100 pointer-events-auto animate-float-delayed whitespace-nowrap transition-colors">
+              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500"></span>
+              Laravel
+            </div>
+
+            <div className="flex absolute top-[61%] -right-1 sm:-right-2 md:-right-6 z-20 items-center gap-1.5 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm px-2 py-0.5 sm:px-3.5 sm:py-1.5 rounded-full shadow-md border border-slate-100 dark:border-slate-700 text-[9px] sm:text-xs font-semibold text-slate-800 dark:text-slate-100 pointer-events-auto animate-float-slow whitespace-nowrap transition-colors">
+              <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-sky-600"></span>
+              MySQL
+            </div>
+
           </div>
         </div>
 
-        {/* 4. FOOTER HERO */}
-        <div className="w-full flex justify-between items-end z-30 mt-auto pt-2">
+        {/* 4. Bottom Bar */}
+        <div className="z-30 flex flex-row items-end justify-between gap-2 pt-2 sm:pt-4 mt-auto">
           
-          {/* Teks Kiri */}
-          <div className="max-w-[130px] xs:max-w-[170px] sm:max-w-xs text-left z-30 bg-white/30 dark:bg-slate-900/30 sm:bg-transparent backdrop-blur-[2px] sm:backdrop-blur-none p-1 sm:p-0 rounded-lg">
-            <h2 className="text-[11px] xs:text-xs sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
-              Full Stack Developer
+          {/* Peran & Tombol (Sisi Kiri) */}
+          <div className="space-y-1 sm:space-y-2.5">
+            <h2 className="text-xs sm:text-lg md:text-2xl font-extrabold text-slate-900 dark:text-white leading-tight transition-colors">
+              Full Stack<br className="block sm:hidden" /> Developer
             </h2>
-            <p className="text-[9px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1 leading-tight sm:leading-relaxed hidden xs:block">
-              Siswa Rekayasa Perangkat Lunak yang berfokus membangun aplikasi web modern.
-            </p>
             <a
               href="#contact"
-              className="inline-flex items-center gap-1 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 px-2.5 py-1 sm:px-5 sm:py-2.5 rounded-full text-[9px] sm:text-xs font-medium mt-1.5 sm:mt-2 transition-all hover:scale-105 shadow-sm"
+              className="inline-flex items-center gap-1.5 bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 text-[9px] sm:text-xs md:text-sm font-semibold px-2.5 py-1.5 sm:px-5 sm:py-2.5 rounded-full transition-all shadow-md whitespace-nowrap group"
             >
-              Let's collaborate <ArrowUpRight className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
+              <span>Let's collaborate</span>
+              <ArrowIcon className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-white dark:text-slate-900 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </a>
           </div>
 
-          {/* Sosial Media Kanan */}
-          <div className="flex flex-col items-end gap-1 sm:gap-2.5 z-30 bg-white/30 dark:bg-slate-900/30 sm:bg-transparent backdrop-blur-[2px] sm:backdrop-blur-none p-1 sm:p-0 rounded-lg">
+          {/* Social Links (Sisi Kanan Vertikal) */}
+          <div className="flex flex-col items-end gap-0.5 sm:gap-1.5 text-[11px] sm:text-sm md:text-base font-semibold text-slate-800 dark:text-slate-200">
             <a 
-              href="https://github.com/sukohariadi25-collab" 
+              href="https://github.com" 
               target="_blank" 
               rel="noreferrer" 
-              className="inline-flex items-center gap-1 sm:gap-1.5 text-[9px] xs:text-[10px] sm:text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors group"
+              className="hover:text-black dark:hover:text-white flex items-center gap-1 transition-colors group"
             >
-              <Github className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white" /> 
               <span>Github</span> 
-              <ArrowUpRight className="w-2.5 h-2.5 sm:w-3 opacity-60 group-hover:opacity-100 transition-opacity" />
+              <ArrowIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-800 dark:text-slate-200 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </a>
             <a 
               href="https://linkedin.com" 
               target="_blank" 
               rel="noreferrer" 
-              className="inline-flex items-center gap-1 sm:gap-1.5 text-[9px] xs:text-[10px] sm:text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors group"
+              className="hover:text-black dark:hover:text-white flex items-center gap-1 transition-colors group"
             >
-              <Linkedin className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white" /> 
               <span>LinkedIn</span> 
-              <ArrowUpRight className="w-2.5 h-2.5 sm:w-3 opacity-60 group-hover:opacity-100 transition-opacity" />
+              <ArrowIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-800 dark:text-slate-200 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </a>
             <a 
-              href="https://www.instagram.com/its.shuu31?stkn=eHVnOWRqYWVnb2tz" 
+              href="https://instagram.com" 
               target="_blank" 
               rel="noreferrer" 
-              className="inline-flex items-center gap-1 sm:gap-1.5 text-[9px] xs:text-[10px] sm:text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors group"
+              className="hover:text-black dark:hover:text-white flex items-center gap-1 transition-colors group"
             >
-              <Instagram className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white" /> 
               <span>Instagram</span> 
-              <ArrowUpRight className="w-2.5 h-2.5 sm:w-3 opacity-60 group-hover:opacity-100 transition-opacity" />
+              <ArrowIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-800 dark:text-slate-200 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </a>
           </div>
 
@@ -294,16 +293,6 @@ export default function Hero() {
       </div>
     </section>
   );
-}
+};
 
-function drawBrush(ctx: CanvasRenderingContext2D, size: number) {
-  ctx.beginPath();
-  const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size / 2);
-  gradient.addColorStop(0, 'rgba(0, 0, 0, 1)');
-  gradient.addColorStop(0.7, 'rgba(0, 0, 0, 0.8)');
-  gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-  ctx.fillStyle = gradient;
-  ctx.ellipse(0, 0, size * 0.55, size * 0.3, Math.PI / 6, 0, 2 * Math.PI);
-  ctx.fill();
-}
+export default Hero;

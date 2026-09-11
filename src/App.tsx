@@ -2,18 +2,20 @@ import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
+import Stats from './components/Stats';
 import Skills from './components/Skills';
 import Projects from './components/Projects';
 import Experience from './components/Experience';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 
-
 export default function App() {
-  const [darkMode, setDarkMode] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      return savedTheme === 'dark';
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        return savedTheme === 'dark';
+      }
     }
     return true; // Default dark mode
   });
@@ -36,6 +38,7 @@ export default function App() {
       <main className="w-[96%] max-w-[1400px] mx-auto px-2 sm:px-4 space-y-20 pb-20 pt-24">
         <Hero />
         <About />
+        <Stats />
         <Skills />
         <Projects />
         <Experience />
