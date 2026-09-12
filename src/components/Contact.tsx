@@ -23,7 +23,7 @@ export default function ContactCTA() {
     
     const formData = new FormData(e.currentTarget);
     // Masukkan Web3Forms Access Key kamu di sini
-    formData.append('access_key', 'YOUR_ACCESS_KEY_HERE');
+    formData.append('access_key', 'bbd390e7-251a-42ad-bc26-33d2ef2a50d6');
 
     try {
       const response = await fetch('https://api.web3forms.com/submit', {
