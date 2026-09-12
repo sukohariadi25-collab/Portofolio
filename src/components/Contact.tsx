@@ -121,7 +121,7 @@ export default function ContactCTA() {
               </span>
               <div className="grid grid-cols-4 gap-2">
                 <a 
-                  href="https://github.com" 
+                  href="https://github.com/sukohariadi25-collab" 
                   target="_blank" 
                   rel="noreferrer"
                   title="GitHub Profile"
@@ -143,7 +143,7 @@ export default function ContactCTA() {
                 </a>
 
                 <a 
-                  href="https://wa.me/" 
+                  href="https://wa.me/6281358286882" 
                   target="_blank" 
                   rel="noreferrer"
                   title="WhatsApp Contact"
@@ -154,7 +154,7 @@ export default function ContactCTA() {
                 </a>
 
                 <a 
-                  href="https://instagram.com" 
+                  href="https://www.instagram.com/its.shuu31?stkn=eHVnOWRqYWVnb2tz" 
                   target="_blank" 
                   rel="noreferrer"
                   title="Instagram Profile"

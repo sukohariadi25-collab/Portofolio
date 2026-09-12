@@ -67,7 +67,7 @@ export default function About() {
             {/* Badges Informasi */}
             <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-200/80 dark:border-slate-800">
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/60 text-xs font-medium text-slate-700 dark:text-slate-300">
-                <MapPin className="w-3.5 h-3.5 text-emerald-500" /> Indonesia
+                <MapPin className="w-3.5 h-3.5 text-emerald-500" /> Nganjuk, Jawa Timur, Indonesia
               </span>
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/60 text-xs font-medium text-slate-700 dark:text-slate-300">
                 <GraduationCap className="w-3.5 h-3.5 text-blue-500" /> Siswa RPL (SMK)

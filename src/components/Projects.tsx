@@ -10,7 +10,7 @@ type Project = {
   category: 'web' | 'uiux';
   categoryLabel: string;
   description: string;
-  images: string[]; // 🖼️ Array multi-gambar
+  images: string[];
   tags: string[];
   demoUrl?: string;
   githubUrl?: string;
@@ -108,7 +108,6 @@ export default function Projects() {
     setActiveImageIndex((prev) => (prev - 1 + selectedProject.images.length) % selectedProject.images.length);
   };
 
-  // Keyboard shortcut untuk navigasi modal (Esc & Arrow keys)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!selectedProject) return;
@@ -180,7 +179,7 @@ export default function Projects() {
             <div
               key={project.id}
               onClick={() => openModal(project)}
-              className="group cursor-pointer bg-white dark:bg-slate-800/50 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-300 flex flex-col justify-between"
+              className="group cursor-pointer bg-white dark:bg-slate-800/40 hover:dark:bg-slate-800/70 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-700/60 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
             >
               <div>
                 {/* Image Preview Container */}
@@ -191,9 +190,16 @@ export default function Projects() {
                     className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                   />
 
+                  {/* Gradient Overlay pada Hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                    <span className="text-xs font-medium text-white bg-indigo-600/90 backdrop-blur-xs px-3 py-1.5 rounded-lg shadow-sm">
+                      Buka Detail Project &rarr;
+                    </span>
+                  </div>
+
                   {/* Category Badge */}
-                  <div className="absolute top-3 left-3">
-                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-semibold bg-white/90 dark:bg-slate-900/90 backdrop-blur-md text-slate-800 dark:text-slate-200 shadow-sm border border-slate-200/50 dark:border-slate-700/50">
+                  <div className="absolute top-3 left-3 z-10">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-white/90 dark:bg-slate-900/90 backdrop-blur-md text-slate-800 dark:text-slate-200 shadow-xs border border-slate-200/50 dark:border-slate-700/50">
                       {project.category === 'web' ? (
                         <Code2 className="w-3 h-3 text-indigo-500" />
                       ) : (
@@ -205,8 +211,8 @@ export default function Projects() {
 
                   {/* Multi-Image Counter Indicator */}
                   {project.images.length > 1 && (
-                    <div className="absolute bottom-3 right-3">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-medium bg-slate-900/80 text-white backdrop-blur-md shadow-sm">
+                    <div className="absolute bottom-3 right-3 z-10">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-medium bg-slate-900/80 text-white backdrop-blur-md shadow-xs">
                         <ImageIcon className="w-3 h-3" />
                         <span>+{project.images.length - 1} foto</span>
                       </span>
@@ -218,27 +224,51 @@ export default function Projects() {
                   {project.title}
                 </h3>
                 
-                <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed line-clamp-2">
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-relaxed line-clamp-2">
                   {project.description}
                 </p>
               </div>
 
               {/* Footer Card */}
-              <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-700/50 flex flex-wrap items-center justify-between gap-3">
+              <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-700/50 flex items-center justify-between gap-3">
                 <div className="flex flex-wrap gap-1.5">
                   {project.tags.map((tag, i) => (
                     <span
                       key={i}
-                      className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] font-medium text-slate-600 dark:text-slate-300"
+                      className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800/80 text-[10px] font-medium text-slate-600 dark:text-slate-300 border border-slate-200/50 dark:border-slate-700/50"
                     >
                       {tag}
                     </span>
                   ))}
                 </div>
 
-                <span className="text-xs font-semibold text-indigo-500 dark:text-indigo-400 group-hover:underline">
-                  Lihat Detail →
-                </span>
+                {/* Direct Action Links */}
+                <div className="flex items-center gap-1.5">
+                  {project.demoUrl && (
+                    <a
+                      href={project.demoUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+                      title="Live Preview"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                  {project.githubUrl && (
+                    <a
+                      href={project.githubUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+                      title="Source Code"
+                    >
+                      <Github className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           ))}
@@ -246,10 +276,12 @@ export default function Projects() {
 
       </div>
 
-      {/* 🖼️ PROJECT MODAL DIALOG */}
+      {/* PROJECT MODAL DIALOG */}
       {selectedProject && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
-          
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-fadeIn"
+          onClick={closeModal}
+        >
           <div 
             className="bg-white dark:bg-slate-900 rounded-[28px] max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-800 shadow-2xl relative flex flex-col"
             onClick={(e) => e.stopPropagation()}
@@ -271,7 +303,7 @@ export default function Projects() {
                   className="w-full h-full object-contain"
                 />
 
-                {/* Arrow Navigation (Jika foto > 1) */}
+                {/* Arrow Navigation */}
                 {selectedProject.images.length > 1 && (
                   <>
                     <button
@@ -371,7 +403,7 @@ export default function Projects() {
                     rel="noreferrer"
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-900 dark:text-white text-xs font-medium transition-all"
                   >
-                    <span className="text-sm"></span>
+                    <Layout className="w-4 h-4 text-pink-500" />
                     <span>Figma Prototype</span>
                   </a>
                 )}

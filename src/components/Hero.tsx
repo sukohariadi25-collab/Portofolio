@@ -157,7 +157,7 @@ export const Hero: React.FC = () => {
             transform: translateY(0px);
           }
           50% {
-            transform: translateY(-6px);
+            transform: translateY(-9px);
           }
         }
 
@@ -260,7 +260,7 @@ export const Hero: React.FC = () => {
           {/* Social Links (Sisi Kanan Vertikal) */}
           <div className="flex flex-col items-end gap-0.5 sm:gap-1.5 text-[11px] sm:text-sm md:text-base font-semibold text-slate-800 dark:text-slate-200">
             <a 
-              href="https://github.com" 
+              href="https://github.com/sukohariadi25-collab" 
               target="_blank" 
               rel="noreferrer" 
               className="hover:text-black dark:hover:text-white flex items-center gap-1 transition-colors group"
@@ -278,7 +278,7 @@ export const Hero: React.FC = () => {
               <ArrowIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-800 dark:text-slate-200 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </a>
             <a 
-              href="https://instagram.com" 
+              href="https://www.instagram.com/its.shuu31?stkn=eHVnOWRqYWVnb2tz" 
               target="_blank" 
               rel="noreferrer" 
               className="hover:text-black dark:hover:text-white flex items-center gap-1 transition-colors group"

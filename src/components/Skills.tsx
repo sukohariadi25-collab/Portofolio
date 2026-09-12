@@ -32,7 +32,7 @@ export default function Skills() {
         { 
           name: "React.js", 
           icon: <span className="text-[#61DAFB]"><SiReact /></span>,
-          level: "Advanced",
+          level: "Intermediate",
           description: "Membangun SPA (Single Page Application) responsif dengan React Hooks, State Management (Zustand/Context API), dan integrasi REST API."
         },
         { 
@@ -74,7 +74,7 @@ export default function Skills() {
         { 
           name: "Express.js", 
           icon: <span className="dark:text-white text-black"><SiExpress /></span>,
-          level: "Intermediate",
+          level: "Begginer",
           description: "Pembuatan RESTful API terstruktur, autentikasi berbasis JWT, serta penanganan error middleware."
         },
         { 
@@ -86,7 +86,7 @@ export default function Skills() {
         { 
           name: "MySQL", 
           icon: <span className="text-[#4479A1]"><SiMysql /></span>,
-          level: "Intermediate",
+          level: "Advanced",
           description: "Perancangan skema database relasional, relasi tabel, penulisan query SQL, dan manajemen data."
         },
       ]
@@ -116,13 +116,13 @@ export default function Skills() {
         { 
           name: "Postman", 
           icon: <span className="text-[#FF6C37]"><SiPostman /></span>,
-          level: "Advanced",
+          level: "Begginer",
           description: "Pengujian endpoint REST API, otomasi dokumentasi API, dan simulasi request/response."
         },
         { 
           name: "Vite", 
           icon: <span className="text-[#646CFF]"><SiVite /></span>,
-          level: "Advanced",
+          level: "Intermediate",
           description: "Penggunaan bundler modern untuk percepatan Hot Module Replacement (HMR) saat development."
         },
       ]
